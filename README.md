@@ -1,0 +1,2 @@
+# Website-to-save-records
+This is website which is based on HTML, CSS, JavaScript and python. This will allow user to choose expenses and cashbook related data and save it in excel file. It also save date and time by allowing user to search data by date and it automatically select current date at time of expenses addition. You need to install python before using this.
