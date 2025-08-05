@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Expenses</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            display: flex;
+            background-color: #F8F9FA;
+        }
+        .sidebar {
+            width: 270px;
+            height: 100vh;
+            background-color: #2C3E50;
+            padding: 20px;
+            color: white;
+            position: fixed;
+            text-align: center;
+        }
+        .sidebar h3 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+        .sidebar a {
+            display: block;
+            padding: 12px;
+            color: white;
+            text-decoration: none;
+            margin: 10px 0;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+        .sidebar a:hover, .sidebar .active {
+            background-color: #34495E;
+        }
+        .content {
+            margin-left: 290px;
+            padding: 30px;
+            width: 100%;
+        }
+        .form-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: auto;
+        }
+        .btn-search {
+            background-color: #007bff;
+            color: white;
+            width: 100%;
+        }
+        .btn-search:hover {
+            background-color: #0056b3;
+        }
+        table {
+            margin-top: 20px;
+        }
+        .total-container {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 10px;
+            text-align: right;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h3>💰 Expense Tracker</h3>
+        <a href="/">📌 Add Expense</a>
+        <a href="/search" class="active">🔍 Search Expenses</a>
+        <a href="{{ url_for('add_funding') }}">💵 Add Funding</a>
+        <a href="{{ url_for('search_funding') }}">📊 Search Funding</a>
+        <button class="btn btn-danger w-100 mt-3" id="shutdown-btn">⛔ Stop Server</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <h2 class="text-center">🔍 Search Expenses</h2>
+
+        <!-- Search Form -->
+        <div class="form-container">
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="search_date" class="form-label">Enter Date:</label>
+                    <input type="date" class="form-control" name="search_date" id="search_date">
+                </div>
+
+                <div class="mb-3">
+                    <label for="search_expense" class="form-label">Expense Type:</label>
+                    <select class="form-control" name="search_expense" id="search_expense">
+                        <option value="">All</option>
+                        {% for type in expense_types %}
+                        <option value="{{ type }}">{{ type }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="search_payment_method" class="form-label">Payment Method:</label>
+                    <select class="form-control" name="search_payment_method" id="search_payment_method">
+                        <option value="">All</option>
+                        {% for method in payment_methods %}
+                        <option value="{{ method }}">{{ method }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-search">🔍 Search</button>
+            </form>
+        </div>
+
+        <!-- Search Results -->
+        {% if message %}
+        <p class="text-center mt-3 text-danger"><strong>{{ message }}</strong></p>
+        {% endif %}
+
+        {% if results %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Date</th>
+                        <th>Expense Type</th>
+                        <th>Payment Method</th>
+                        <th>Details</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in results %}
+                    <tr>
+                        <td>{{ row["Date"] }}</td>
+                        <td>{{ row["Expense Type"] }}</td>
+                        <td>{{ row["Payment Method"] }}</td>
+                        <td>{{ row["Details"] }}</td>
+                        <td>Rs. {{ "{:,.2f}".format(row["Amount"]) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Total Amount Display -->
+        <div class="total-container">
+            Total Amount: <span class="text-primary">Rs. {{ "{:,.2f}".format(total_expense) }}</span>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.getElementById("shutdown-btn").addEventListener("click", function() {
+            fetch('/shutdown', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    setTimeout(() => { window.location.href = "about:blank"; }, 1500);
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    </script>
+
+</body>
+</html>
